@@ -26,7 +26,11 @@ def get_path(filename, dirname=None):
     return path
 
 
-def save_language_model(language_model_data, language_model_version, dirname=None):
+def save_language_model(language_model_data,
+                        language_model_version,
+                        language_model_size,
+                        language_model_dimension,
+                        dirname=None):
     logger.info(f'Saving Glove language model version {language_model_version} ...')
 
     words = []
@@ -49,18 +53,20 @@ def save_language_model(language_model_data, language_model_version, dirname=Non
 
             try:
                 vect = np.array(line[1:]).astype(np.float)
-                if vect.size != 200:
-                    vect = np.random.randn(200) * np.sqrt(1 / (200 - 1))
+                if vect.size != language_model_dimension:
+                    vect = np.random.randn(language_model_dimension) * np.sqrt(1 / (language_model_dimension - 1))
             except ValueError as e:
                 err += 1
-                vect = np.random.randn(200) * np.sqrt(1 / (200 - 1))
+                vect = np.random.randn(language_model_dimension) * np.sqrt(1 / (language_model_dimension - 1))
             finally:
                 vectors.append(vect)
 
     logger.info('Populating language model file complete!')
     logger.info('Finalising language model file ...')
 
-    vectors = bcolz.carray(vectors[1:].reshape((400000, 200)), rootdir=language_model, mode='w')
+    vectors = bcolz.carray(vectors[1:].reshape((language_model_size, language_model_dimension)),
+                           rootdir=language_model,
+                           mode='w')
     vectors.flush()
 
     logger.info('Finalising language model file complete!')
@@ -129,11 +135,17 @@ def load_fastext():
 if __name__ == "__main__":
     logger.info('START!')
 
-    language_model_data = 'glove.6B.200d.txt'
-    language_model_version = '6B.200'
+    language_model_data = 'glove.twitter.27B.200d.txt'
+    language_model_version = 'twitter.27B.200'
+    language_model_size = 1193514
+    language_model_dimension = 200
     dirname = 'language_models/glove'
 
-    save_language_model(language_model_data, language_model_version, dirname)
+    save_language_model(language_model_data,
+                        language_model_version,
+                        language_model_size,
+                        language_model_dimension,
+                        dirname)
     glove = load_glove(language_model_version, dirname)
 
     logger.info('DONE!')

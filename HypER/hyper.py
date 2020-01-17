@@ -431,7 +431,7 @@ if __name__ == '__main__':
 
         experiment.train_and_eval(language_model, entity2idx)
     else:
-        language_model_version = '6B.200'
+        language_model_version = 'twitter.27B.200'
         dirname = 'language_models/glove'
         language_model = lmm.load_glove(language_model_version, dirname)
 
