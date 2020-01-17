@@ -208,9 +208,10 @@ class Experiment:
 
             try:
                 entity_string = entity2idx[str(entity_idx)]
-
-                for entity in entity_string:
-                    embedding.append(language_model[entity])
+                word_lists = [entity_words.split() for entity_words in entity_string.split(',')]
+                entity_words = [word_list[0] for word_list in word_lists]
+                for word in entity_words:
+                    embedding.append(language_model[word.lower()])
                     entity_found = True
 
                 weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
@@ -255,6 +256,7 @@ class Experiment:
 
                     for relation in relation_string:
                         logger.debug(f'relation: {relation}')
+                        relation, = re.findall(r'\w+', relation.lower())
                         document.append(language_model[relation])
 
                     embedding.append(np.array(document).mean(axis=0))
