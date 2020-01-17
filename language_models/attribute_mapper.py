@@ -22,8 +22,8 @@ def get_path(filename, dirname=None):
     return path
 
 
-def save_dictionary(knowledge_graph='wn', attribute='entity', delimiter=' '):
-    logger.info(f'Saving {attribute} map ...')
+def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
+    logger.info(f'Saving {attribute} map for {knowledge_graph} ...')
 
     word2idx = {}
 
@@ -36,8 +36,10 @@ def save_dictionary(knowledge_graph='wn', attribute='entity', delimiter=' '):
 
         for line in tsv_reader:
             idx = line[0]
-            entity = line[1]
-            word2idx[idx] = entity
+            entity = word2idx.get(idx)
+            if not entity:
+                entity = line[1]
+                word2idx[idx] = entity
 
     filename = f'{knowledge_graph}_{attribute}_map.pkl'
     dirname = 'language_models/FB15k'
@@ -46,7 +48,7 @@ def save_dictionary(knowledge_graph='wn', attribute='entity', delimiter=' '):
     with open(path, 'wb') as writepickle:
         pkl.dump(word2idx, writepickle)
 
-    logger.info(f'Successfully saved {attribute} map!')
+    logger.info(f'Successfully saved {attribute} map for {knowledge_graph}!')
 
 
 def load_map(path):
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     knowledge_graph = 'fb15k'
     attribute = 'entity'
 
-    save_dictionary(knowledge_graph, attribute, '\t')
+    save_map(knowledge_graph, attribute, '\t')
 
     filename = f'{knowledge_graph}_{attribute}_map.pkl'
     dirname = 'language_models/FB15k'

@@ -192,13 +192,13 @@ class Experiment:
         logger.info(f'Epoch: {epoch}, Mean rank_{data_type.lower()}: {np.mean(ranks)}')
         logger.info(f'Epoch: {epoch}, Mean reciprocal rank_{data_type.lower()}: {np.mean(1. / np.array(ranks))}')
 
-    def train_and_eval(self, entity2idx, language_model):
+    def train_and_eval(self, language_model, entity2idx):
         logger.info(f'Training the {model_name} model ...')
 
         self.entity_idxs = {d.entities[i]: i for i in range(len(d.entities))}
         matrix_entity_len = len(d.entities)
         logger.debug(f'matrix_entity_len: {matrix_entity_len}')
-        weights_entity_matrix = np.zeros((matrix_entity_len, 300))
+        weights_entity_matrix = np.zeros((matrix_entity_len, self.ent_vec_dim))
         entities_found = 0
 
         for entity_idx in self.entity_idxs.keys():
@@ -216,7 +216,7 @@ class Experiment:
                 weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
             except KeyError:
                 if not embedding:
-                    weights_entity_matrix[i] = np.random.randn(300) * np.sqrt(1 / (300 - 1))
+                    weights_entity_matrix[i] = np.random.randn(self.ent_vec_dim) * np.sqrt(1 / (self.ent_vec_dim - 1))
                 else:
                     weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
             finally:
@@ -238,7 +238,7 @@ class Experiment:
 
         matrix_relation_len = len(d.relations)
         logger.debug(f'matrix_relation_len: {matrix_relation_len}')
-        weights_relation_matrix = np.zeros((matrix_relation_len, 300))
+        weights_relation_matrix = np.zeros((matrix_relation_len, self.rel_vec_dim))
         relations_found = 0
 
         for relation_idx in self.relation_idxs.keys():
@@ -263,7 +263,7 @@ class Experiment:
                 relation_found = True
             except KeyError:
                 if not embedding:
-                    weights_entity_matrix[i] = np.random.randn(300) * np.sqrt(1 / (300 - 1))
+                    weights_entity_matrix[i] = np.random.randn(self.rel_vec_dim) * np.sqrt(1 / (self.rel_vec_dim - 1))
                 else:
                     weights_relation_matrix[i] = np.array(embedding).mean(axis=0)
             finally:
@@ -383,7 +383,7 @@ if __name__ == '__main__':
                         help='Which dataset to use: FB15k, FB15k-237, WN18 or WN18RR')
     parser.add_argument('--languagemodel',
                         type=str,
-                        default="Fasttext",
+                        default="Glove",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
 
@@ -408,8 +408,8 @@ if __name__ == '__main__':
                             batch_size=128,
                             learning_rate=0.001,
                             decay_rate=0.99,
-                            ent_vec_dim=300,
-                            rel_vec_dim=300,
+                            ent_vec_dim=200,
+                            rel_vec_dim=200,
                             cuda=False,
                             input_dropout=0.2,
                             hidden_dropout=0.3,
@@ -429,12 +429,18 @@ if __name__ == '__main__':
 
         entity2idx = am.load_map(path)
 
-        experiment.train_and_eval(entity2idx, language_model)
+        experiment.train_and_eval(language_model, entity2idx)
     else:
         language_model_version = '6B.200'
         dirname = 'language_models/glove'
         language_model = lmm.load_glove(language_model_version, dirname)
 
-        experiment.train_and_eval(language_model)
+        entityids_map = 'fb15k_entity_map.pkl'
+        dirnmae = 'language_models/FB15k'
+        path = am.get_path(entityids_map, dirnmae)
+
+        entity2idx = am.load_map(path)
+
+        experiment.train_and_eval(language_model, entity2idx)
 
     logger.info('DONE!')

@@ -37,6 +37,8 @@ def save_language_model(language_model_data, language_model_version, dirname=Non
     language_model = get_path(language_model_file, dirname)
     vectors = bcolz.carray(np.zeros(1), rootdir=language_model, mode='w')
 
+    logger.info('Populating language model file ...')
+
     path = get_path(language_model_data, dirname)
     with open(path, 'rb') as f:
         for idx, l in enumerate(f):
@@ -55,8 +57,14 @@ def save_language_model(language_model_data, language_model_version, dirname=Non
             finally:
                 vectors.append(vect)
 
+    logger.info('Populating language model file complete!')
+    logger.info('Finalising language model file ...')
+
     vectors = bcolz.carray(vectors[1:].reshape((400000, 200)), rootdir=language_model, mode='w')
     vectors.flush()
+
+    logger.info('Finalising language model file complete!')
+    logger.info('Saving language model words ...')
 
     filename = f'{language_model_version}_words.pkl'
     path = get_path(filename, dirname)
@@ -64,12 +72,16 @@ def save_language_model(language_model_data, language_model_version, dirname=Non
     with open(path, 'wb') as language_model_words:
         pickle.dump(words, language_model_words)
 
+    logger.info('Saving language model words complete!')
+    logger.info('Saving language model word ids ...')
+
     filename = f'{language_model_version}_idx.pkl'
     path = get_path(filename, dirname)
 
     with open(path, 'wb') as language_model_ids:
         pickle.dump(word2idx, language_model_ids)
 
+    logger.info('Saving language model word ids complete!')
     logger.info(f'Saving Glove language model version {language_model_version} complete!')
 
 
