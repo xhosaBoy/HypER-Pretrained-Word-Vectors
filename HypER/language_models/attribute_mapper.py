@@ -16,7 +16,7 @@ logger.addHandler(stream_handler)
 
 
 def get_path(filename, dirname=None):
-    root = os.path.dirname(os.path.dirname(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     logger.debug(f'root: {root}')
     path = os.path.join(root, dirname, filename) if dirname else os.path.join(root, filename)
     return path
@@ -42,7 +42,7 @@ def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
                 word2idx[idx] = entity
 
     filename = f'{knowledge_graph}_{attribute}_map.pkl'
-    dirname = 'language_models/FB15k'
+    dirname = 'HypER/language_models/FB15k'
     path = get_path(filename, dirname)
 
     with open(path, 'wb') as writepickle:
@@ -51,8 +51,12 @@ def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
     logger.info(f'Successfully saved {attribute} map for {knowledge_graph}!')
 
 
-def load_map(path):
+def load_map(knowledge_graph, attribute='entity'):
     logger.info(f'Loading attribute ids map ...')
+
+    entityids_map = f'{knowledge_graph}_{attribute}_map.pkl'
+    dirname = f'HypER/language_models/{knowledge_graph}'
+    path = get_path(entityids_map, dirname)
 
     with open(path, 'rb') as attribute_ids_map:
         word2idx = pkl.load(attribute_ids_map)
@@ -65,15 +69,10 @@ def load_map(path):
 if __name__ == '__main__':
     logger.info('START!')
 
-    knowledge_graph = 'fb15k'
+    knowledge_graph = 'FB15k'
     attribute = 'entity'
 
     save_map(knowledge_graph, attribute, '\t')
-
-    filename = f'{knowledge_graph}_{attribute}_map.pkl'
-    dirname = 'language_models/FB15k'
-    path = get_path(filename, dirname)
-
-    fb_entity_map = load_map(path)
+    fb15k_entity_map = load_map(knowledge_graph, attribute)
 
     logger.info('DONE!')

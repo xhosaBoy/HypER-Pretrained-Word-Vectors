@@ -12,10 +12,9 @@ import torch
 from torch.optim.lr_scheduler import ExponentialLR
 
 # internal
-import language_models.language_model_manager as lmm
-import language_models.attribute_mapper as am
 from load_data import Data
 from models import HypE, HypER, DistMult, ConvE, ComplEx
+from language_models import language_model_manager as lmm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -422,27 +421,9 @@ if __name__ == '__main__':
                             filt_w=9,
                             label_smoothing=0.1)
 
-    if language_model_name == 'Fasttext':
-        language_model = lmm.load_fastext()
-
-        entityids_map = 'fb15k_entity_map.pkl'
-        dirnmae = 'language_models/FB15k'
-        path = am.get_path(entityids_map, dirnmae)
-
-        entity2idx = am.load_map(path)
-
-        experiment.train_and_eval(language_model, entity2idx)
-    else:
-        language_model_version = 'twitter.27B.200'
-        dirname = 'language_models/glove'
-        language_model = lmm.load_glove(language_model_version, dirname)
-
-        entityids_map = 'fb15k_entity_map.pkl'
-        dirnmae = 'language_models/FB15k'
-        path = am.get_path(entityids_map, dirnmae)
-
-        entity2idx = am.load_map(path)
-
-        experiment.train_and_eval(language_model, entity2idx)
+    knowledge_graph_map = {'WN18': 'WN18', 'WN18RR': 'WN18', 'FB15k': 'FB15k', 'FB15k-237': 'FB15k'}
+    knowledge_graph = knowledge_graph_map[dataset]
+    language_model, entity2idx = lmm.load_language_model(language_model_name, knowledge_graph)
+    experiment.train_and_eval(language_model, entity2idx)
 
     logger.info('DONE!')

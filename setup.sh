@@ -1,6 +1,7 @@
 #!/bin/bash
 
-wget https://drive.google.com/drive/u/0/folders/13-_KyI8vhW2LztXMdR-JuFqKFSl9UTaw -O /tmp/mid2name.tsv
-wget http://nlp.stanford.edu/data/glove.twitter.27B.zip -O ./language_models/glove/glove.twitter.27B.zip
+gunzip ./data/FB15k/mid2name.tsv.gz
+wget http://nlp.stanford.edu/data/glove.twitter.27B.zip -O HypER/language_models/glove/glove.twitter.27B.zip
 sudo apt install unzip
-unzip language_models/glove/glove.twitter.27B.zip
+unzip HypER/language_models/glove/glove.twitter.27B.zip -d HypER/language_models/glove/
+python HypER/language_models/attribute_mapper.py

@@ -10,6 +10,9 @@ import fasttext
 import bcolz
 import numpy as np
 
+# internal
+from language_models import attribute_mapper as am
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
@@ -21,16 +24,12 @@ logger.addHandler(stream_handler)
 
 
 def get_path(filename, dirname=None):
-    root = os.path.dirname(os.path.dirname(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     path = os.path.join(root, dirname, filename) if filename else os.path.join(root, filename)
     return path
 
 
-def save_language_model(language_model_data,
-                        language_model_version,
-                        language_model_size,
-                        language_model_dimension,
-                        dirname=None):
+def save_language_model(language_model_data, language_model_version, language_model_size, language_model_dimension):
     logger.info(f'Saving Glove language model version {language_model_version} ...')
 
     words = []
@@ -38,6 +37,7 @@ def save_language_model(language_model_data,
     err = 0
 
     language_model_file = f'{language_model_version}.dat'
+    dirname = 'HypER/language_models/glove'
     language_model = get_path(language_model_file, dirname)
     vectors = bcolz.carray(np.zeros(1), rootdir=language_model, mode='w')
 
@@ -91,8 +91,10 @@ def save_language_model(language_model_data,
     logger.info(f'Saving Glove language model version {language_model_version} complete!')
 
 
-def load_glove(language_model_version, dirname=None):
+def load_glove(language_model_version):
     logger.info(f'Loading Glove language model ...')
+
+    dirname = 'HypER/language_models/glove'
 
     filename = f'{language_model_version}.dat'
     path = get_path(filename, dirname)
@@ -122,7 +124,7 @@ def load_fastext():
     logger.info(f'Loading Fasttext language model ...')
 
     language_model_name = 'cc.en.300.bin'
-    dirname = 'language_models/fasttext'
+    dirname = 'HypER/language_models/fasttext'
     path = get_path(language_model_name, dirname)
 
     language_model = fasttext.load_model(path)
@@ -132,6 +134,22 @@ def load_fastext():
     return language_model
 
 
+def load_language_model(language_model_name, knowledge_graph):
+    logger.info(f'Loading {language_model_name} language model and entity IDs map ...')
+
+    if language_model_name == 'Fasttext':
+        language_model = load_fastext()
+    else:
+        language_model_version = 'twitter.27B.200'
+        language_model = load_glove(language_model_version)
+
+    entity2idx = am.load_map(knowledge_graph)
+
+    logger.info(f'Loading {language_model_name} language model and entity IDs map complete!')
+
+    return language_model, entity2idx
+
+
 if __name__ == "__main__":
     logger.info('START!')
 
@@ -139,13 +157,12 @@ if __name__ == "__main__":
     language_model_version = 'twitter.27B.200'
     language_model_size = 1193514
     language_model_dimension = 200
-    dirname = 'language_models/glove'
 
-    save_language_model(language_model_data,
-                        language_model_version,
-                        language_model_size,
-                        language_model_dimension,
-                        dirname)
-    glove = load_glove(language_model_version, dirname)
+    save_language_model(language_model_data, language_model_version, language_model_size, language_model_dimension)
+    glove = load_glove(language_model_version)
+
+    language_model_name = 'Glove'
+    knowledge_graph = 'FB15k'
+    language_model, entity2idx = load_language_model(language_model_name, knowledge_graph)
 
     logger.info('DONE!')
