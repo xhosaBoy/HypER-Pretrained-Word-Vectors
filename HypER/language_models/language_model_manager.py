@@ -11,7 +11,10 @@ import bcolz
 import numpy as np
 
 # internal
-from language_models import attribute_mapper as am
+try:
+    import attribute_mapper as am
+except ImportError as e:
+    from language_models import attribute_mapper as am
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
