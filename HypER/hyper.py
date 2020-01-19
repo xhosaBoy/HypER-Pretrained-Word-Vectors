@@ -202,18 +202,26 @@ class Experiment:
 
         for entity_idx in self.entity_idxs.keys():
             i = self.entity_idxs[entity_idx]
-            entity_found = False
             embedding = []
+            words = []
+            entity_found = False
 
             try:
                 entity_string = entity2idx[str(entity_idx)]
-                word_lists = [entity_words.split() for entity_words in entity_string.split(',')]
-                entity_words = [word_list[0] for word_list in word_lists]
-                for word in entity_words:
-                    embedding.append(language_model[word.lower()])
-                    entity_found = True
+                entities = [entity_words.split() for entity_words in entity_string.split(',')]
+
+                for entity in entities:
+                    logger.debug(f'entity: {entity}')
+
+                    for word in entity:
+                        logger.debug(f'word: {word}')
+                        word = word.lower()
+                        words.append(language_model[word])
+
+                    embedding.append(np.array(words).mean(axis=0))
 
                 weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
+                entity_found = True
             except KeyError:
                 if not embedding:
                     weights_entity_matrix[i] = np.random.randn(self.ent_vec_dim) * np.sqrt(1 / (self.ent_vec_dim - 1))
@@ -243,22 +251,22 @@ class Experiment:
 
         for relation_idx in self.relation_idxs.keys():
             i = self.relation_idxs[relation_idx]
-            document = []
             embedding = []
+            words = []
             relation_found = False
 
             try:
-                document_string = relation2idx[str(i)]
+                relations = relation2idx[str(i)]
 
-                for relation_string in document_string:
-                    logger.debug(f'relation_string: {relation_string}')
+                for relation in relations:
+                    logger.debug(f'relation: {relation}')
 
-                    for relation in relation_string:
-                        logger.debug(f'relation: {relation}')
-                        relation, = re.findall(r'\w+', relation.lower())
-                        document.append(language_model[relation])
+                    for word in relation:
+                        logger.debug(f'word: {word}')
+                        word, = re.findall(r'\w+', word.lower())
+                        words.append(language_model[word])
 
-                    embedding.append(np.array(document).mean(axis=0))
+                    embedding.append(np.array(words).mean(axis=0))
 
                 weights_relation_matrix[i] = np.array(embedding).mean(axis=0)
                 relation_found = True
