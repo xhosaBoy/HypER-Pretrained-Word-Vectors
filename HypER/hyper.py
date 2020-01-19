@@ -12,10 +12,9 @@ import torch
 from torch.optim.lr_scheduler import ExponentialLR
 
 # internal
-import language_models.language_model_manager as lmm
-import language_models.attribute_mapper as am
 from load_data import Data
 from models import HypE, HypER, DistMult, ConvE, ComplEx
+from language_models import language_model_manager as lmm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -26,7 +25,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
-file_handler = logging.FileHandler('hntn_train_validate_and_test_fb15k_237_300d_hypothesis.log')
+file_handler = logging.FileHandler('hntn_train_validate_and_test_fb15k_237_200d_hypothesis.log')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -192,40 +191,49 @@ class Experiment:
         logger.info(f'Epoch: {epoch}, Mean rank_{data_type.lower()}: {np.mean(ranks)}')
         logger.info(f'Epoch: {epoch}, Mean reciprocal rank_{data_type.lower()}: {np.mean(1. / np.array(ranks))}')
 
-    def train_and_eval(self, entity2idx, language_model):
+    def train_and_eval(self, language_model, entity2idx):
         logger.info(f'Training the {model_name} model ...')
 
         self.entity_idxs = {d.entities[i]: i for i in range(len(d.entities))}
         matrix_entity_len = len(d.entities)
         logger.debug(f'matrix_entity_len: {matrix_entity_len}')
-        weights_entity_matrix = np.zeros((matrix_entity_len, 300))
+        weights_entity_matrix = np.zeros((matrix_entity_len, self.ent_vec_dim))
         entities_found = 0
 
         for entity_idx in self.entity_idxs.keys():
             i = self.entity_idxs[entity_idx]
-            entity_found = False
             embedding = []
+            words = []
+            entity_found = False
 
             try:
                 entity_string = entity2idx[str(entity_idx)]
+                entities = [entity_words.split() for entity_words in entity_string.split(',')]
 
-                for entity in entity_string:
-                    embedding.append(language_model[entity])
-                    entity_found = True
+                for entity in entities:
+                    logger.debug(f'entity: {entity}')
+
+                    for word in entity:
+                        logger.debug(f'word: {word}')
+                        word = word.lower()
+                        words.append(language_model[word])
+
+                    embedding.append(np.array(words).mean(axis=0))
 
                 weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
+                entity_found = True
             except KeyError:
                 if not embedding:
-                    weights_entity_matrix[i] = np.random.randn(300) * np.sqrt(1 / (300 - 1))
+                    weights_entity_matrix[i] = np.random.randn(self.ent_vec_dim) * np.sqrt(1 / (self.ent_vec_dim - 1))
                 else:
                     weights_entity_matrix[i] = np.array(embedding).mean(axis=0)
             finally:
                 if entity_found:
                     entities_found += 1
 
-        logger.info(f'number of entities_found: {entities_found}')
-        logger.info(f'number of unique entities found: {len(self.entity_idxs.keys())}')
-        logger.info(f'entity pre trained vector coverage: {(entities_found / len(self.entity_idxs.keys()) * 100):.2f}%')
+        logger.info(f'number of entities found: {entities_found}')
+        logger.info(f'total number of entities: {len(self.entity_idxs.keys())}')
+        logger.info(f'entity pre-trained vector coverage: {(entities_found / len(self.entity_idxs.keys()) * 100):.2f}%')
 
         self.entity_weights = weights_entity_matrix
         logger.debug(f'weights_entity_matrix size: {weights_entity_matrix.size}')
@@ -238,32 +246,33 @@ class Experiment:
 
         matrix_relation_len = len(d.relations)
         logger.debug(f'matrix_relation_len: {matrix_relation_len}')
-        weights_relation_matrix = np.zeros((matrix_relation_len, 300))
+        weights_relation_matrix = np.zeros((matrix_relation_len, self.rel_vec_dim))
         relations_found = 0
 
         for relation_idx in self.relation_idxs.keys():
             i = self.relation_idxs[relation_idx]
-            document = []
             embedding = []
+            words = []
             relation_found = False
 
             try:
-                document_string = relation2idx[str(i)]
+                relations = relation2idx[str(i)]
 
-                for relation_string in document_string:
-                    logger.debug(f'relation_string: {relation_string}')
+                for relation in relations:
+                    logger.debug(f'relation: {relation}')
 
-                    for relation in relation_string:
-                        logger.debug(f'relation: {relation}')
-                        document.append(language_model[relation])
+                    for word in relation:
+                        logger.debug(f'word: {word}')
+                        word, = re.findall(r'\w+', word.lower())
+                        words.append(language_model[word])
 
-                    embedding.append(np.array(document).mean(axis=0))
+                    embedding.append(np.array(words).mean(axis=0))
 
                 weights_relation_matrix[i] = np.array(embedding).mean(axis=0)
                 relation_found = True
             except KeyError:
                 if not embedding:
-                    weights_entity_matrix[i] = np.random.randn(300) * np.sqrt(1 / (300 - 1))
+                    weights_entity_matrix[i] = np.random.randn(self.rel_vec_dim) * np.sqrt(1 / (self.rel_vec_dim - 1))
                 else:
                     weights_relation_matrix[i] = np.array(embedding).mean(axis=0)
             finally:
@@ -271,7 +280,7 @@ class Experiment:
                     relations_found += 1
 
         logger.info(f'number of relations found: {relations_found}')
-        logger.info(f'number of unique relations found: {len(self.relation_idxs.keys())}')
+        logger.info(f'total number of relations: {len(self.relation_idxs.keys())}')
         logger.info(f'relations pre-trained vector coverage: '
                     f'{(relations_found / len(self.relation_idxs.keys()) * 100):.2f}%')
 
@@ -383,7 +392,7 @@ if __name__ == '__main__':
                         help='Which dataset to use: FB15k, FB15k-237, WN18 or WN18RR')
     parser.add_argument('--languagemodel',
                         type=str,
-                        default="Fasttext",
+                        default="Glove",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
 
@@ -408,9 +417,9 @@ if __name__ == '__main__':
                             batch_size=128,
                             learning_rate=0.001,
                             decay_rate=0.99,
-                            ent_vec_dim=300,
-                            rel_vec_dim=300,
-                            cuda=False,
+                            ent_vec_dim=200,
+                            rel_vec_dim=200,
+                            cuda=True,
                             input_dropout=0.2,
                             hidden_dropout=0.3,
                             feature_map_dropout=0.2,
@@ -420,21 +429,9 @@ if __name__ == '__main__':
                             filt_w=9,
                             label_smoothing=0.1)
 
-    if language_model_name == 'Fasttext':
-        language_model = lmm.load_fastext()
-
-        entityids_map = 'fb15k_entity_map.pkl'
-        dirnmae = 'language_models/FB15k'
-        path = am.get_path(entityids_map, dirnmae)
-
-        entity2idx = am.load_map(path)
-
-        experiment.train_and_eval(entity2idx, language_model)
-    else:
-        language_model_version = '6B.200'
-        dirname = 'language_models/glove'
-        language_model = lmm.load_glove(language_model_version, dirname)
-
-        experiment.train_and_eval(language_model)
+    knowledge_graph_map = {'WN18': 'WN18', 'WN18RR': 'WN18', 'FB15k': 'FB15k', 'FB15k-237': 'FB15k'}
+    knowledge_graph = knowledge_graph_map[dataset]
+    language_model, entity2idx = lmm.load_language_model(language_model_name, knowledge_graph)
+    experiment.train_and_eval(language_model, entity2idx)
 
     logger.info('DONE!')
