@@ -17,11 +17,11 @@ except ImportError as e:
     from language_models import attribute_mapper as am
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
 
 stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     glove = load_glove(language_model_version)
 
     language_model_name = 'Glove'
-    knowledge_graph = 'FB15k'
+    knowledge_graph = 'WN18'
     language_model, entity2idx = load_language_model(language_model_name, knowledge_graph)
 
     logger.info('DONE!')

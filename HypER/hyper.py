@@ -25,7 +25,7 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
-file_handler = logging.FileHandler('hntn_train_validate_and_test_fb15k_237_200d_hypothesis.log')
+file_handler = logging.FileHandler('hntn_train_validate_and_test_wn18rr_200d_hypothesis.log')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -242,7 +242,7 @@ class Experiment:
         relation2idx = {str(i): re.sub(r'[/]', ' ', d.relations[i]).strip().split() for i in range(len(d.relations))}
 
         for idx in relation2idx:
-            relation2idx[idx] = [item.split('_') for item in relation2idx[idx]]
+            relation2idx[idx] = [item.replace('_', ' ').strip().split() for item in relation2idx[idx]]
 
         matrix_relation_len = len(d.relations)
         logger.debug(f'matrix_relation_len: {matrix_relation_len}')
@@ -387,7 +387,7 @@ if __name__ == '__main__':
                         help='Which algorithm to use: HypER, ConvE, DistMult, or ComplEx')
     parser.add_argument('--dataset',
                         type=str,
-                        default="FB15k-237",
+                        default="WN18RR",
                         nargs="?",
                         help='Which dataset to use: FB15k, FB15k-237, WN18 or WN18RR')
     parser.add_argument('--languagemodel',

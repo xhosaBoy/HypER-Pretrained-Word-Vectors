@@ -6,7 +6,7 @@ import logging
 import pickle as pkl
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
 
 stream_handler = logging.StreamHandler(sys.stdout)
@@ -22,13 +22,13 @@ def get_path(filename, dirname=None):
     return path
 
 
-def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
+def save_map(knowledge_graph='FB15k', attribute='entity', entity_id_2_name_file='mid2name.tsv', delimiter='\t'):
     logger.info(f'Saving {attribute} map for {knowledge_graph} ...')
 
     word2idx = {}
 
-    dirname = 'data/FB15k'
-    filename = 'mid2name.tsv'
+    dirname = f'data/{knowledge_graph}'
+    filename = entity_id_2_name_file
     path = get_path(filename, dirname)
 
     with open(path, 'r', encoding='utf-8') as entityfile:
@@ -42,7 +42,7 @@ def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
                 word2idx[idx] = entity
 
     filename = f'{knowledge_graph}_{attribute}_map.pkl'
-    dirname = 'HypER/language_models/FB15k'
+    dirname = f'HypER/language_models/{knowledge_graph}'
     path = get_path(filename, dirname)
 
     with open(path, 'wb') as writepickle:
@@ -52,7 +52,7 @@ def save_map(knowledge_graph='wn18', attribute='entity', delimiter=' '):
 
 
 def load_map(knowledge_graph, attribute='entity'):
-    logger.info(f'Loading attribute ids map ...')
+    logger.info(f'Loading {attribute} ids map ...')
 
     entityids_map = f'{knowledge_graph}_{attribute}_map.pkl'
     dirname = f'HypER/language_models/{knowledge_graph}'
@@ -61,7 +61,7 @@ def load_map(knowledge_graph, attribute='entity'):
     with open(path, 'rb') as attribute_ids_map:
         word2idx = pkl.load(attribute_ids_map)
 
-    logger.info(f'Successfully loaded attribute ids map!')
+    logger.info(f'Successfully loaded {attribute} ids map!')
 
     return word2idx
 
@@ -69,10 +69,11 @@ def load_map(knowledge_graph, attribute='entity'):
 if __name__ == '__main__':
     logger.info('START!')
 
-    knowledge_graph = 'FB15k'
+    knowledge_graph = 'WN18'
     attribute = 'entity'
+    entity_id_2_name = 'synsetid2name.tsv'
 
-    save_map(knowledge_graph, attribute, '\t')
+    save_map(knowledge_graph, attribute, entity_id_2_name, '\t')
     fb15k_entity_map = load_map(knowledge_graph, attribute)
 
     logger.info('DONE!')
