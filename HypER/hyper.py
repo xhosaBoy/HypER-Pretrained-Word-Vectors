@@ -411,7 +411,7 @@ if __name__ == '__main__':
                             decay_rate=0.99,
                             ent_vec_dim=200,
                             rel_vec_dim=200,
-                            cuda=False,
+                            cuda=True,
                             input_dropout=0.2,
                             hidden_dropout=0.3,
                             feature_map_dropout=0.2,
