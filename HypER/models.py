@@ -105,7 +105,7 @@ class HypER(torch.nn.Module):
 
     @staticmethod
     def init():
-        logger.info('Initialising HypER with Pre trained Word Vectors...')
+        logger.info('Initialising HypER+ with Pre-trained Word Vectors...')
 
     def forward(self, e1_idx, r_idx):
         e1 = self.E(e1_idx).view(-1, 1, 1, self.E.weight.size(1))
