@@ -231,9 +231,9 @@ class Experiment:
                 if entity_found:
                     entities_found += 1
 
-        logger.info(f'number of entities_found: {entities_found}')
-        logger.info(f'number of unique entities found: {len(self.entity_idxs.keys())}')
-        logger.info(f'entity pre trained vector coverage: {(entities_found / len(self.entity_idxs.keys()) * 100):.2f}%')
+        logger.info(f'number of entities found: {entities_found}')
+        logger.info(f'total number of entities: {len(self.entity_idxs.keys())}')
+        logger.info(f'entity pre-trained vector coverage: {(entities_found / len(self.entity_idxs.keys()) * 100):.2f}%')
 
         self.entity_weights = weights_entity_matrix
         logger.debug(f'weights_entity_matrix size: {weights_entity_matrix.size}')
@@ -280,7 +280,7 @@ class Experiment:
                     relations_found += 1
 
         logger.info(f'number of relations found: {relations_found}')
-        logger.info(f'number of unique relations found: {len(self.relation_idxs.keys())}')
+        logger.info(f'total number of relations: {len(self.relation_idxs.keys())}')
         logger.info(f'relations pre-trained vector coverage: '
                     f'{(relations_found / len(self.relation_idxs.keys()) * 100):.2f}%')
 
