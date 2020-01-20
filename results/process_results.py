@@ -88,25 +88,14 @@ def write_results(results=None):
         for metric in results:
             metric_baseline, metric_hypothesis = results[metric]
 
-            with open(f'hntn_train_validate_and_test_wn18rr_200d_{metric}.csv', mode='w') as resultsfile:
+            with open(f'hntn_train_validate_and_test_fb15k_237_200d_{metric}.csv', mode='w') as resultsfile:
                 csv_writer = csv.writer(resultsfile)
-                # csv_writer.writerow([f'{metric}_training_baseline',
-                #                      f'{metric}_validation_baseline',
-                #                      f'{metric}_test_baseline',
-                #                      f'{metric}_training_hypothesis',
-                #                      f'{metric}_validation_hypothesis',
-                #                      f'{metric}_test_hypothesis'])
                 csv_writer.writerow([f'{metric}_training_hypothesis',
                                      f'{metric}_validation_hypothesis',
                                      f'{metric}_test_hypothesis',
                                      f'{metric}_training_baseline',
                                      f'{metric}_validation_baseline',
                                      f'{metric}_test_baseline'])
-                # for epoch in metric_baseline:
-                #     result = metric_baseline[epoch]
-                #     result.extend(metric_hypothesis[epoch])
-                #     logger.debug(f'result: {result}')
-                #     csv_writer.writerow(result)
 
                 for epoch in metric_hypothesis:
                     result = metric_hypothesis[epoch]
@@ -116,8 +105,8 @@ def write_results(results=None):
 
 
 def main():
-    path_baseline = get_path('hntn_train_validate_and_test_wn18rr_200d_baseline.log', 'results')
-    path_hypothesis = get_path('hntn_train_validate_and_test_wn18rr_200d_hypothesis.log', 'results')
+    path_baseline = get_path('hntn_train_validate_and_test_fb15k_237_200d_baseline.log', 'results')
+    path_hypothesis = get_path('hntn_train_validate_and_test_fb15k_237_200d_hypothesis.log', 'results')
 
     logger.info('Parsing baseline results...')
     results_cost_baseline, \
