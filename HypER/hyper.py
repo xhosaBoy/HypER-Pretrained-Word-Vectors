@@ -395,11 +395,17 @@ if __name__ == '__main__':
                         default="Glove",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
+    parser.add_argument('--languagemodelversion',
+                        type=str,
+                        default="twitter.27B.200",
+                        nargs="?",
+                        help='Which Glove version to use: 6B.200 or twitter.27B.200')
 
     args = parser.parse_args()
     model_name = args.algorithm
     dataset = args.dataset
     language_model_name = args.languagemodel
+    language_model_version = args.languagemodelversion
 
     data_dir = os.path.join('data', dataset)
     logger.debug(f'data_dir: {data_dir}')
@@ -431,7 +437,7 @@ if __name__ == '__main__':
 
     knowledge_graph_map = {'WN18': 'WN18', 'WN18RR': 'WN18', 'FB15k': 'FB15k', 'FB15k-237': 'FB15k'}
     knowledge_graph = knowledge_graph_map[dataset]
-    language_model, entity2idx = lmm.load_language_model(language_model_name, knowledge_graph)
+    language_model, entity2idx = lmm.load_language_model(language_model_name, language_model_version, knowledge_graph)
     experiment.train_and_eval(language_model, entity2idx)
 
     logger.info('DONE!')

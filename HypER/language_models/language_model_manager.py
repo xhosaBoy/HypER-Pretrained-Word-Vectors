@@ -137,18 +137,19 @@ def load_fastext():
     return language_model
 
 
-def load_language_model(language_model_name, knowledge_graph):
-    logger.info(f'Loading {language_model_name} language model and entity IDs map ...')
+def load_language_model(language_model_name, language_model_version, knowledge_graph):
+    logger.info(f'Loading {language_model_name} language model version {language_model_version} and entity IDs map ...')
 
     if language_model_name == 'Fasttext':
         language_model = load_fastext()
     else:
-        language_model_version = 'twitter.27B.200'
+        language_model_version = language_model_version
         language_model = load_glove(language_model_version)
 
     entity2idx = am.load_map(knowledge_graph)
 
-    logger.info(f'Loading {language_model_name} language model and entity IDs map complete!')
+    logger.info(f"""Loading {language_model_name} language model version {language_model_version} 
+                    and entity IDs map complete!""")
 
     return language_model, entity2idx
 
@@ -170,6 +171,6 @@ if __name__ == "__main__":
 
     knowledge_graph = 'FB15k'
 
-    language_model, entity2idx = load_language_model(language_model_name, knowledge_graph)
+    language_model, entity2idx = load_language_model(language_model_name, language_model_version, knowledge_graph)
 
     logger.info('DONE!')
