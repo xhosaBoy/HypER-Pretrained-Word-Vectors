@@ -156,16 +156,20 @@ def load_language_model(language_model_name, knowledge_graph):
 if __name__ == "__main__":
     logger.info('START!')
 
-    language_model_data = 'glove.twitter.27B.200d.txt'
-    language_model_version = 'twitter.27B.200'
-    language_model_size = 1193514
-    language_model_dimension = 200
+    language_model_name = 'Glove'
+    language_model_version = '6B.200'
+    language_model_data_map = {'6B.200':'glove.6B.200d.txt', 'twitter.27B.200': 'glove.twitter.27B.200d.txt'}
+    language_model_size_map = {'6B.200': 400000, 'twitter.27B.200': 1193514}
+    language_model_dimension_map = {'Glove': 200, 'Fasttext': 300}
+    language_model_data = language_model_data_map[language_model_version]
+    language_model_size = language_model_size_map[language_model_version]
+    language_model_dimension = language_model_dimension_map[language_model_name]
 
     save_language_model(language_model_data, language_model_version, language_model_size, language_model_dimension)
     glove = load_glove(language_model_version)
 
-    language_model_name = 'Glove'
-    knowledge_graph = 'WN18'
+    knowledge_graph = 'FB15k'
+
     language_model, entity2idx = load_language_model(language_model_name, knowledge_graph)
 
     logger.info('DONE!')
