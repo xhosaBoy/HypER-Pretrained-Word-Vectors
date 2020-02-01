@@ -69,9 +69,9 @@ def load_map(knowledge_graph, attribute='entity'):
 if __name__ == '__main__':
     logger.info('START!')
 
-    knowledge_graph = 'FB15k'
+    knowledge_graph = 'WN18'
     attribute = 'entity'
-    entity_id_2_name = 'mid2name.tsv'
+    entity_id_2_name = 'synsetid2name.tsv'
 
     save_map(knowledge_graph, attribute, entity_id_2_name, '\t')
     fb15k_entity_map = load_map(knowledge_graph, attribute)
