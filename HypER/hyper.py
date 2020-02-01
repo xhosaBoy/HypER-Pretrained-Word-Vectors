@@ -410,9 +410,13 @@ if __name__ == '__main__':
     language_model_dimension_map = {'Glove': 200, 'Fasttext': 300}
     language_model_dimension = language_model_dimension_map[language_model_name]
 
+    logger.info(f'Logging {dataset} dataset ...')
+
     data_dir = os.path.join('data', dataset)
     logger.debug(f'data_dir: {data_dir}')
     d = Data(data_dir=data_dir, reverse=True)
+    
+    logger.info(f'Logging {dataset} dataset complete!')
 
     torch.backends.cudnn.deterministic = True
     seed = 42
