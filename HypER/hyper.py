@@ -392,12 +392,12 @@ if __name__ == '__main__':
                         help='Which dataset to use: FB15k, FB15k-237, WN18 or WN18RR')
     parser.add_argument('--languagemodel',
                         type=str,
-                        default="Glove",
+                        default="Fasttext",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
     parser.add_argument('--languagemodelversion',
                         type=str,
-                        default="twitter.27B.200",
+                        default="6B.200",
                         nargs="?",
                         help='Which Glove version to use: 6B.200 or twitter.27B.200')
 
@@ -406,6 +406,9 @@ if __name__ == '__main__':
     dataset = args.dataset
     language_model_name = args.languagemodel
     language_model_version = args.languagemodelversion
+
+    language_model_dimension_map = {'Glove': 200, 'Fasttext': 300}
+    language_model_dimension = language_model_dimension_map[language_model_name]
 
     data_dir = os.path.join('data', dataset)
     logger.debug(f'data_dir: {data_dir}')
@@ -423,8 +426,8 @@ if __name__ == '__main__':
                             batch_size=128,
                             learning_rate=0.001,
                             decay_rate=0.99,
-                            ent_vec_dim=200,
-                            rel_vec_dim=200,
+                            ent_vec_dim=language_model_dimension,
+                            rel_vec_dim=language_model_dimension,
                             cuda=True,
                             input_dropout=0.2,
                             hidden_dropout=0.3,

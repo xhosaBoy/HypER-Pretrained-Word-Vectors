@@ -148,8 +148,8 @@ def load_language_model(language_model_name, language_model_version, knowledge_g
 
     entity2idx = am.load_map(knowledge_graph)
 
-    logger.info(f"""Loading {language_model_name} language model version {language_model_version} 
-                    and entity IDs map complete!""")
+    logger.info(f'Loading {language_model_name} language model version {language_model_version} '
+                f'and entity IDs map complete!')
 
     return language_model, entity2idx
 
