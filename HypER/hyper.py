@@ -392,7 +392,7 @@ if __name__ == '__main__':
                         help='Which dataset to use: FB15k, FB15k-237, WN18 or WN18RR')
     parser.add_argument('--languagemodel',
                         type=str,
-                        default="Fasttext",
+                        default="Glove",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
     parser.add_argument('--languagemodelversion',
@@ -415,7 +415,7 @@ if __name__ == '__main__':
     data_dir = os.path.join('data', dataset)
     logger.debug(f'data_dir: {data_dir}')
     d = Data(data_dir=data_dir, reverse=True)
-    
+
     logger.info(f'Logging {dataset} dataset complete!')
 
     torch.backends.cudnn.deterministic = True
