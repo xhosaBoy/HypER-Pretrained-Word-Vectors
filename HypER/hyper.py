@@ -395,15 +395,28 @@ if __name__ == '__main__':
                         default="Glove",
                         nargs="?",
                         help='Which language model to use: Fasttext or Glove')
+    parser.add_argument('--languagemodelversion',
+                        type=str,
+                        default="6B.200",
+                        nargs="?",
+                        help='Which Glove version to use: 6B.200 or twitter.27B.200')
 
     args = parser.parse_args()
     model_name = args.algorithm
     dataset = args.dataset
     language_model_name = args.languagemodel
+    language_model_version = args.languagemodelversion
+
+    language_model_dimension_map = {'Glove': 200, 'Fasttext': 300}
+    language_model_dimension = language_model_dimension_map[language_model_name]
+
+    logger.info(f'Logging {dataset} dataset ...')
 
     data_dir = os.path.join('data', dataset)
     logger.debug(f'data_dir: {data_dir}')
     d = Data(data_dir=data_dir, reverse=True)
+
+    logger.info(f'Logging {dataset} dataset complete!')
 
     torch.backends.cudnn.deterministic = True
     seed = 42
@@ -417,8 +430,8 @@ if __name__ == '__main__':
                             batch_size=128,
                             learning_rate=0.001,
                             decay_rate=0.99,
-                            ent_vec_dim=200,
-                            rel_vec_dim=200,
+                            ent_vec_dim=language_model_dimension,
+                            rel_vec_dim=language_model_dimension,
                             cuda=True,
                             input_dropout=0.2,
                             hidden_dropout=0.3,
@@ -431,7 +444,7 @@ if __name__ == '__main__':
 
     knowledge_graph_map = {'WN18': 'WN18', 'WN18RR': 'WN18', 'FB15k': 'FB15k', 'FB15k-237': 'FB15k'}
     knowledge_graph = knowledge_graph_map[dataset]
-    language_model, entity2idx = lmm.load_language_model(language_model_name, knowledge_graph)
+    language_model, entity2idx = lmm.load_language_model(language_model_name, language_model_version, knowledge_graph)
     experiment.train_and_eval(language_model, entity2idx)
 
     logger.info('DONE!')

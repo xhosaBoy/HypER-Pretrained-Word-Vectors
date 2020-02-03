@@ -137,18 +137,19 @@ def load_fastext():
     return language_model
 
 
-def load_language_model(language_model_name, knowledge_graph):
-    logger.info(f'Loading {language_model_name} language model and entity IDs map ...')
+def load_language_model(language_model_name, language_model_version, knowledge_graph):
+    logger.info(f'Loading {language_model_name} language model version {language_model_version} and entity IDs map ...')
 
     if language_model_name == 'Fasttext':
         language_model = load_fastext()
     else:
-        language_model_version = 'twitter.27B.200'
+        language_model_version = language_model_version
         language_model = load_glove(language_model_version)
 
     entity2idx = am.load_map(knowledge_graph)
 
-    logger.info(f'Loading {language_model_name} language model and entity IDs map complete!')
+    logger.info(f'Loading {language_model_name} language model version {language_model_version} '
+                f'and entity IDs map complete!')
 
     return language_model, entity2idx
 
@@ -156,16 +157,20 @@ def load_language_model(language_model_name, knowledge_graph):
 if __name__ == "__main__":
     logger.info('START!')
 
-    language_model_data = 'glove.twitter.27B.200d.txt'
-    language_model_version = 'twitter.27B.200'
-    language_model_size = 1193514
-    language_model_dimension = 200
+    language_model_name = 'Glove'
+    language_model_version = '6B.200'
+    language_model_data_map = {'6B.200':'glove.6B.200d.txt', 'twitter.27B.200': 'glove.twitter.27B.200d.txt'}
+    language_model_size_map = {'6B.200': 400000, 'twitter.27B.200': 1193514}
+    language_model_dimension_map = {'Glove': 200, 'Fasttext': 300}
+    language_model_data = language_model_data_map[language_model_version]
+    language_model_size = language_model_size_map[language_model_version]
+    language_model_dimension = language_model_dimension_map[language_model_name]
 
     save_language_model(language_model_data, language_model_version, language_model_size, language_model_dimension)
     glove = load_glove(language_model_version)
 
-    language_model_name = 'Glove'
-    knowledge_graph = 'WN18'
-    language_model, entity2idx = load_language_model(language_model_name, knowledge_graph)
+    knowledge_graph = 'FB15k'
+
+    language_model, entity2idx = load_language_model(language_model_name, language_model_version, knowledge_graph)
 
     logger.info('DONE!')
