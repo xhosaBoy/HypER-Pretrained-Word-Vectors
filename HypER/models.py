@@ -103,9 +103,12 @@ class HypER(torch.nn.Module):
 
         self.loss = torch.nn.BCELoss()
 
-    @staticmethod
-    def init():
-        logger.info('Initialising HypER+ with Pre-trained Word Vectors...')
+    # @staticmethod
+    def init(self):
+        # logger.info('Initialising HypER+ with Pre-trained Word Vectors...')
+        logger.info('Initialising HypER+ with Xavier Initialisation ...')
+        xavier_normal_(self.E.weight.data)
+        xavier_normal_(self.R.weight.data)
 
     def forward(self, e1_idx, r_idx):
         e1 = self.E(e1_idx).view(-1, 1, 1, self.E.weight.size(1))
