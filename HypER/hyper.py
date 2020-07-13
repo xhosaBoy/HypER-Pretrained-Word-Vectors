@@ -370,7 +370,7 @@ class Experiment:
                                                              train_data_sample_size,
                                                              replace=False), :]
 
-                    ogger.info(f'Starting Evaluation: Training ...')
+                    logger.info(f'Starting Evaluation: Training ...')
                     self.evaluate(model, train_data, epoch, 'training')
                     logger.info(f'Evaluation: Training complete!')
                     logger.info(f'Starting Evaluation: Validation ...')
