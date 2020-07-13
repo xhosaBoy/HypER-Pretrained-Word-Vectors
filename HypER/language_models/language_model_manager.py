@@ -169,7 +169,7 @@ if __name__ == "__main__":
     save_language_model(language_model_data, language_model_version, language_model_size, language_model_dimension)
     glove = load_glove(language_model_version)
 
-    knowledge_graph = 'FB15k'
+    knowledge_graph = 'WN18'
 
     language_model, entity2idx = load_language_model(language_model_name, language_model_version, knowledge_graph)
 
